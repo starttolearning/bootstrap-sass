@@ -8,10 +8,19 @@ var gulp = require('gulp'),
     minifyHTML = require('gulp-minify-html'),
     concat = require('gulp-concat');
 
-var env ='',
+var env,
+    cssStyle,
     outputDir;
 
-outputDir ="builds/development";
+env='production';
+if( env === 'production'){
+    outputDir ="builds/production";
+    cssStyle ="compressed";
+}else{
+    outputDir ="builds/development";
+    cssStyle ="expanded";
+}
+
 // sources
 jsSources = [
     'components/scripts/jquery.js',
@@ -36,7 +45,7 @@ gulp.task('compass', function() {
     .pipe(compass({
       sass: 'components/sass',
       image: outputDir+'/images',
-      style: 'expanded'
+      style: cssStyle
     })
     .on('error', gutil.log))
     .pipe(gulp.dest( outputDir+'/css' ))
@@ -47,11 +56,11 @@ gulp.task('compass', function() {
 gulp.task('watch', function() {
   gulp.watch(jsSources, ['js']);
   gulp.watch('components/sass/*.scss', ['compass']);
-  gulp.watch(outputDir+'/*.html', ['html']);
+  gulp.watch('builds/development/*.html', ['html']);
 });
 
 gulp.task('html', function() {
-  gulp.src(outputDir+'/*.html')
+  gulp.src('builds/development/*.html')
     .pipe(gulpif(env === 'production', minifyHTML()))
     .pipe(gulpif(env === 'production', gulp.dest(outputDir)))
     .pipe(connect.reload())
@@ -64,7 +73,7 @@ gulp.task('connect', function() {
   });
 });
 
-gulp.task('default', [ 'js', 'compass', 'watch', 'connect', 'watch']);
+gulp.task('default', [ 'js', 'compass', 'html', 'watch', 'connect', 'watch']);
 
 //
 //var env,
